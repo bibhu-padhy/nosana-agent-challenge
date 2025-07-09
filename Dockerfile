@@ -31,8 +31,11 @@ COPY . .
 # Build the project
 RUN pnpm run build
 
+# Pre-download the model during image build (not at runtime)
+RUN ollama serve & sleep 5 && ollama pull ${MODEL_NAME_AT_ENDPOINT} && pkill ollama
+
 # Override the default entrypoint
 ENTRYPOINT ["/bin/sh", "-c"]
 
-# Start Ollama service and pull the model, then run the app
-CMD ["ollama serve & sleep 5 && ollama pull ${MODEL_NAME_AT_ENDPOINT} && node .mastra/output/index.mjs"]
+# Start Ollama service and run the app (model already downloaded)
+CMD ["ollama serve & sleep 3 && pnpm run dev"]
